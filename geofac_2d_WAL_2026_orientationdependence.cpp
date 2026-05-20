@@ -52,6 +52,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <iostream>
+#include <fstream>
+
+using namespace std;
 
 #define		PI	3.14159265
 #define		M	2147483647.0
@@ -326,6 +329,19 @@ main(int argc, char *argv[])
 		}
     }
     
+	//WAL05192026 Writing the misses of the original and rotated detectors to log files
+
+	char original_misses_filename[100];
+	char rotated_misses_filename[100];
+	char coordinates_filename[100];
+	sprintf(original_misses_filename, "original_misses_log%s.txt", extension);
+	sprintf(rotated_misses_filename, "rotated_misses_log%s.txt", extension);
+	sprintf(coordinates_filename, "misses_coordinates_log%s.txt", extension);
+	
+	ofstream original_misses(original_misses_filename);
+	ofstream rotated_misses(rotated_misses_filename);
+	ofstream coordinates(coordinates_filename);
+
 
 
     n_good = 0;
@@ -388,6 +404,9 @@ main(int argc, char *argv[])
 		*  if not, make new choice.
 		*/
 
+
+
+		
 		
 
 		//Check if x_hit and y_hit are within the geometry of the detector of each layer
@@ -407,6 +426,7 @@ main(int argc, char *argv[])
             x_rotated= x_stationary * cos(ang_off*PI/180.0) + y_stationary * sin(ang_off*PI/180.0);
             y_rotated = -x_stationary * sin(ang_off*PI/180.0) + y_stationary * cos(ang_off*PI/180.0);
 
+			coordinates << x_stationary << "\t" << y_stationary << "\t" << x_rotated << "\t" << y_rotated << "\t" << i << "\n";
 
 			if(circle[i]) {
 				if ( ((x_stationary * x_stationary) + (y_stationary * y_stationary)) > x[i] * x[i]) {
@@ -419,23 +439,44 @@ main(int argc, char *argv[])
 				//check if the next vertex is within the rectangle of the detector
 				if ((x_stationary < -x[i]) || (x_stationary > x[i]))  {
 					missed_detector = 1;
+					std::cout<<"Missed original detector at  "<<x_stationary<<", "<<y_stationary<<" at layer "<<i<<"\n";
 					//break;
+
+					original_misses << x_stationary << "\t" << y_stationary << "\t" << i << "\n";
+					
 				}              
-				if ((y_stationary < -y[i]) || (y_stationary > y[i]))  {
+				else if ((y_stationary < -y[i]) || (y_stationary > y[i]))  {
 					missed_detector = 1;
+					std::cout<<"Missed original detector at  "<<x_stationary<<", "<<y_stationary<<" at layer "<<i<<"\n";
 					//break;
+					original_misses << x_stationary << "\t" << y_stationary << "\t" << i << "\n";
 				}
 
+
+				//WAL05192026 Thought process on how to rotate
 				//do i need to rotate x[i], y[i] by cos(ang_off), sin(ang_off) as well?
-				//Probably yes. For example, if we have a rectangle that we rotate by 90 degrees, then we need to rotate 
+				//Probably yes. For example, if we have a rectangle that we rotate by 90 degrees, then a point at x[i],y[i] 
+				//might be inside before rotation but outside after. ie if there's a rectangle with [-10,10] in x and [-5,5] in y,
+				//then it will be a rectangle with [-5,5] in x and [-10,10] in y after a 90 degree rotation. 
+				//A point at (10,0) would be inside before but outside after.
+
+				//but if we rotate both the point and the rectangle, do we need to rotate anything?
+				//rotating both by the same is the same as not rotating at all
+
+
+				//alternatively if i have a point at [10,0] and it gets rotated to [0,10], then if we check the original rectangle
+				//then we'd see that it's outside and the missed_detector_rotated would trigger
+				//seems good
 
 				if ((x_rotated < -x[i]) || (x_rotated > x[i]))  {
-                    missed_detector_rotated = 1;
+					std::cout<<"Missed rotated detector at  "<<x_rotated<<", "<<y_rotated<<" at layer "<<i<<"\n";
                     //break;
+					rotated_misses << x_rotated << "\t" << y_rotated << "\t" << i << "\n";
                 }
-                if ((y_rotated < -y[i]) || (y_rotated > y[i]))  {
-                    missed_detector_rotated = 1;
+                else if ((y_rotated < -y[i]) || (y_rotated > y[i]))  {
+					std::cout<<"Missed rotated detector at  "<<x_rotated<<", "<<y_rotated<<" at layer "<<i<<"\n";
                     //break;
+					rotated_misses << x_rotated << "\t" << y_rotated << "\t" << i << "\n";
                 }
 			}
 		}
@@ -444,6 +485,7 @@ main(int argc, char *argv[])
 		if (missed_detector) {
 			continue;
 		}
+
 
 			
 		/* same for upper detectors */
@@ -456,32 +498,40 @@ main(int argc, char *argv[])
             x_rotated= x_stationary * cos(ang_off*PI/180.0) + y_stationary * sin(ang_off*PI/180.0);
             y_rotated = -x_stationary * sin(ang_off*PI/180.0) + y_stationary * cos(ang_off*PI/180.0);
 
+			coordinates << x_stationary << "\t" << y_stationary << "\t" << x_rotated << "\t" << y_rotated << "\t" << i << "\n";
+
+
 			if(circle[i]) {
 				if( ((x_stationary * x_stationary) + (y_stationary * y_stationary)) > x[i] * x[i]) {
 					missed_detector = 1;
 					//break;
 				}
-                if ( ((x_rotated * x_rotated) + (y_rotated * y_rotated)) > x[i] * x[i]) {
-                    missed_detector_rotated = 1;
-                   //break;
-                }
+                
 			} else {
 				if ((x_stationary < -x[i]) || (x_stationary > x[i]))  {
 					missed_detector = 1;
-					break;
+					std::cout<<"Missed original detector at  "<<x_stationary<<", "<<y_stationary<<" at layer "<<i<<"\n";
+					original_misses << x_stationary << "\t" << y_stationary << "\t" << i << "\n";
+					//break;
 				}
-				if ((y_stationary < -y[i]) || (y_stationary > y[i]))  {
+				else if ((y_stationary < -y[i]) || (y_stationary > y[i]))  {
 					missed_detector = 1;
-					break;
+					std::cout<<"Missed original detector at  "<<x_stationary<<", "<<y_stationary<<" at layer "<<i<<"\n";
+					original_misses << x_stationary << "\t" << y_stationary << "\t" << i << "\n";
+					//break;
 				}
 
                 if ((x_rotated < -x[i]) || (x_rotated > x[i]))  {
                     missed_detector_rotated = 1;
                     //break;
+					std::cout<<"Missed rotated detector at  "<<x_rotated<<", "<<y_rotated<<" at layer "<<i<<"\n";
+					rotated_misses << x_rotated << "\t" << y_rotated << "\t" << i << "\n";
                 }
-                if ((y_rotated < -y[i]) || (y_rotated > y[i]))  {
+                else if ((y_rotated < -y[i]) || (y_rotated > y[i]))  {
                     missed_detector_rotated = 1;
                     //break;
+					std::cout<<"Missed rotated detector at  "<<x_rotated<<", "<<y_rotated<<" at layer "<<i<<"\n";
+					rotated_misses << x_rotated << "\t" << y_rotated << "\t" << i << "\n";
                 }
 			}
 		}
@@ -493,13 +543,29 @@ main(int argc, char *argv[])
         if (missed_detector_rotated) {
             continue;
         }
+		
 
-
-
-		n_hit[theta_bin][phi_bin]++;   /* Got a hit! Record it. */
+		if (missed_detector == 0) {
+			n_hit[theta_bin][phi_bin]++;   /* Got a hit! Record it. */
+		}
         if (missed_detector_rotated == 0) {
             n_hit_rotated[theta_bin][phi_bin]++;
         }
+
+		if (missed_detector == 0 && missed_detector_rotated == 0) {
+			//fprintf(stderr,"Hit Both!\n");		
+		}
+		else if (missed_detector == 0 && missed_detector_rotated == 1) {
+			std::cout<<"Hit original but not rotated\n";
+		}
+		else if (missed_detector == 1 && missed_detector_rotated == 0) {
+			std::cout<<"Missed original but hit rotated\n";
+		}
+		else {
+			std::cout<<"Both missed\n";
+		}
+
+
 		if (sec_angle_bin < N_SECBINS) {
 		// ignores angles greater than 80 degrees for sec theta hits
 			sec_n_hit[sec_angle_bin]++;
@@ -530,6 +596,9 @@ main(int argc, char *argv[])
 		
 		n_good++;
     }
+	original_misses.close();
+	rotated_misses.close();
+	coordinates.close();
 
     fprintf(outfile,"\nhits\ttries\n");
     fprintf(outfile,"%ld\t%ld\n\n", hits, n_try);
@@ -559,43 +628,58 @@ main(int argc, char *argv[])
 	for(j=0; j<NBINS; j++) {
 		for (j_2=0; j_2<4*NBINS; j_2++) {
 
-	    sum[j][j_2] = 0;
+			//Goes from (0-18) and (0-72), probably theta and phi in 5 degree bins?
+			sum[j][j_2] = 0;
+
+
 			for(k=0; k<5; k++) {
 				for (k_2=0; k_2<5; k_2++) {
+					//m goes from 0 to 89
+					//m_2 goes from 0 to 359
+					//When j=0, m goes from 0 to 5. When j_2=71, m_2 goes from 355 to 360,
+					//Sum [0][71] would be the sum of n_hit[0-4(theta)][355-359(phi)]. This is how we get the binning
+					//Check_count is the total number of hits
 					m = k + (j*5);
 					m_2 = k_2 + (j_2*5);
 					sum[j][j_2] += n_hit[m][m_2];
 					check_count += n_hit[m][m_2];
 				}
 			}
-			//fprintf(stderr,"sum[%d][%d] %ld\n",j,j_2,sum[j][j_2]);
+				//fprintf(stderr,"sum[%d][%d] %ld\n",j,j_2,sum[j][j_2]);
 		}
 
 	}
 	fprintf(stderr,"check_count %d\n",check_count);
 		
 		
-			// summing up for 5 degree angle binss
-		for(j=0; j<2*NBINS; j++) {
-			for (j_2=0; j_2<2*NBINS; j_2++) {
-				
-				sum_gamma[j][j_2] = 0;
-				for(k=0; k<5; k++) {
-					for (k_2=0; k_2<5; k_2++) {
-						m = k + (j*5);
-						m_2 = k_2 + (j_2*5);
-						sum_gamma[j][j_2] += n_hit_gamma[m][m_2];
-						check_count += n_hit_gamma[m][m_2];
-					}
-				}
-				//fprintf(stderr,"sum[%d][%d] %ld\n",j,j_2,sum_gamma[j][j_2]);
-			}
+	// summing up for 5 degree angle binss
+	for(j=0; j<2*NBINS; j++) {
+		for (j_2=0; j_2<2*NBINS; j_2++) {
 			
+			//sum_gamma goes from (0-36) and (0-36), going from 0-180 in 5 degree bins for both gamma and delta
+
+
+			sum_gamma[j][j_2] = 0;
+			for(k=0; k<5; k++) {
+				for (k_2=0; k_2<5; k_2++) {
+					m = k + (j*5);
+					m_2 = k_2 + (j_2*5);
+					sum_gamma[j][j_2] += n_hit_gamma[m][m_2];
+					check_count += n_hit_gamma[m][m_2];
+				}
+			}
+			//fprintf(stderr,"sum[%d][%d] %ld\n",j,j_2,sum_gamma[j][j_2]);
 		}
-		fprintf(stderr,"check_count %d\n",check_count);
+		
+	}
+	fprintf(stderr,"check_count %d\n",check_count);
 
 		
 	/* Total geometry factor */
+
+
+	//area is pi times the number of hits required times the area of the smallest detector divided by the number of tries
+	//How many tries did it take to get the number of hits with a scaling factor of pi*area?
 	area = (PI * (double)hits * min_area) / (double)n_try;
 	printf("total geometry factor: ");
 	printf("%.2lf\n", area);
@@ -604,161 +688,172 @@ main(int argc, char *argv[])
     fprintf(outfile,"total geometry factor: ");
     fprintf(outfile,"%.2lf\n", area);
     fclose(outfile);
-			// Handling output file
-		
-        // Handling output file
-		sprintf(outfile_name,"dgf_2d%s.txt",extension);
-        
-		if((outfile = fopen(outfile_name,"w")) == NULL)
-		{    fprintf(stderr,"Error opening %s for output\n","dgf_2d.txt");
-			exit(0);    }
+	// Handling output file
+
+	//Make dgf files
+	//What do they do?
+	sprintf(outfile_name,"dgf_2d%s.txt",extension);
+	
+	if((outfile = fopen(outfile_name,"w")) == NULL){    
+			fprintf(stderr,"Error opening %s for output\n","dgf_2d.txt");
+			exit(0);    
+	}
 
 	/* differential geometry factors */
 	//printf("\nangle\tgeo_factor\n");
 	tot = 0;
 	for(j=0; j<NBINS; j++) {
 		for (j_2=0; j_2<4*NBINS; j_2++) {
+
+			//diff_geo_fac takes the number of hits in each [theta][phi] 5 degree bin over the total number of hits over all angles times the total geometry factor
+			//This is the fraction that each bin contributes to the total geometry factor
 			diff_geo_fac = ( (double)sum[j][j_2] / hits) * area;
 			tot += diff_geo_fac;
 			//printf("%4.1lf\t%4.1lf\t%10.4lf\n", (double)(2.5 + (j*5)), (double)(2.5 + (j_2*5)), diff_geo_fac);
+			
+			
+			//Writes out the geometry factors for each bin
 			fprintf(outfile,"%4.1lf\t%4.1lf\t%10.4lf\n", (double)(2.5 + (j*5)), (double)(2.5 + (j_2*5)), diff_geo_fac);
 
 		}
 	}
 	printf("total\t%10.4f\n", tot);
-		fclose(outfile);
-		
-		
-			// Generate 1 degree by 1 degree binned differential geometry factors
-			// Handling output file
-		
-        sprintf(outfile_name,"dgf_2d_bin1%s.txt",extension);
+	fclose(outfile);
+	
+	
+		// Generate 1 degree by 1 degree binned differential geometry factors
+		// Handling output file
+	
+	sprintf(outfile_name,"dgf_2d_bin1%s.txt",extension);
 
-        
-		if((outfile = fopen(outfile_name,"w")) == NULL)
-		{    fprintf(stderr,"Error opening %s for output\n","dgf_2d_bin1.txt");
-			exit(0);    }
-		
-		/* differential geometry factors */
-		printf("\nangle\tgeo_factor\n");
-		tot = 0;
-		for(j=0; j<NHITS; j++) {
-			for (j_2=0; j_2<4*NHITS; j_2++) {
-				diff_geo_fac = ( (double)n_hit[j][j_2] / hits) * area;
-				tot += diff_geo_fac;
-				//printf("%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac);
-				fprintf(outfile,"%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac);
-				
-			}
+	
+	if((outfile = fopen(outfile_name,"w")) == NULL)
+	{    fprintf(stderr,"Error opening %s for output\n","dgf_2d_bin1.txt");
+		exit(0);    }
+	
+	/* differential geometry factors */
+	printf("\nangle\tgeo_factor\n");
+	tot = 0;
+	for(j=0; j<NHITS; j++) {
+		for (j_2=0; j_2<4*NHITS; j_2++) {
+			diff_geo_fac = ( (double)n_hit[j][j_2] / hits) * area;
+			tot += diff_geo_fac;
+			//printf("%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac);
+			fprintf(outfile,"%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac);
+			
 		}
-		printf("total\t%10.4f\n", tot);
-		fclose(outfile);
+	}
+	printf("total\t%10.4f\n", tot);
+	fclose(outfile);
 		
 
-			// Generate 1 dimensional 1 degree binned differential geometry factors
-			// Handling output file
-		
-        sprintf(outfile_name,"dgf_1d_bin1%s.txt",extension);
+		// Generate 1 dimensional 1 degree binned differential geometry factors
+		// Handling output file
+	
+	sprintf(outfile_name,"dgf_1d_bin1%s.txt",extension);
 
-        
-		if((outfile = fopen(outfile_name,"w")) == NULL)
-		{    fprintf(stderr,"Error opening %s for output\n","dgf_1d_bin1.txt");
-			exit(0);    }
+	
+	if((outfile = fopen(outfile_name,"w")) == NULL){
+		fprintf(stderr,"Error opening %s for output\n","dgf_1d_bin1.txt");
+		exit(0);    
+	}
+	
+	/* differential geometry factors */
+	//Solely as a function of theta?
+	printf("\nangle\tgeo_factor\n");
+	tot = 0;
+	for(j=0; j<NHITS; j++) {
+		theta_dgf_sum=0;
 		
-		/* differential geometry factors */
-		printf("\nangle\tgeo_factor\n");
-		tot = 0;
-		for(j=0; j<NHITS; j++) {
-                        theta_dgf_sum=0;
-			for (j_2=0; j_2<4*NHITS; j_2++) {
-				diff_geo_fac = ( (double)n_hit[j][j_2] / hits) * area;
-                                theta_dgf_sum += diff_geo_fac;
-                                theta_dgf_sum_total += diff_geo_fac;
-				tot += diff_geo_fac;
-				//printf("%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac);
-				//fprintf(outfile,"%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac);
-				
-			}
-			fprintf(outfile,"%4.1lf\t%10.4lf\n", (double)(0.5 + j), theta_dgf_sum);
+		for (j_2=0; j_2<4*NHITS; j_2++) {
+			diff_geo_fac = ( (double)n_hit[j][j_2] / hits) * area;
+			theta_dgf_sum += diff_geo_fac;
+			theta_dgf_sum_total += diff_geo_fac;
+			tot += diff_geo_fac;
+			//printf("%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac);
+			//fprintf(outfile,"%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac);
+			
 		}
-		printf("total\t%10.4f\t theta_dgf_sum_total\t%10.4f\n", tot, theta_dgf_sum_total);
-		fclose(outfile);
-		
-		
-		
-		/* differential geometry factors */
-		double diff_geo_fac_gamma;
+		fprintf(outfile,"%4.1lf\t%10.4lf\n", (double)(0.5 + j), theta_dgf_sum);
+	}
+	printf("total\t%10.4f\t theta_dgf_sum_total\t%10.4f\n", tot, theta_dgf_sum_total);
+	fclose(outfile);
+	
+	
+	
+	/* differential geometry factors */
+	double diff_geo_fac_gamma;
 
-			// Handling output files
+		// Handling output files
 
-        sprintf(outfile_name,"dgf_2d_g%s.txt",extension);
+	sprintf(outfile_name,"dgf_2d_g%s.txt",extension);
 
-		if((outfile = fopen(outfile_name,"w")) == NULL)
-		{    fprintf(stderr,"Error opening %s for output\n",outfile_name);
-			exit(0);    }
-		
-		printf("\nangle\tgeo_factor\n");
-		tot = 0;
-		for(j=0; j<2*NBINS; j++) {
-			for (j_2=0; j_2<2*NBINS; j_2++) {
-				diff_geo_fac_gamma = ( (double)sum_gamma[j][j_2] / hits) * area;
-				tot += diff_geo_fac_gamma;
-				//printf("%4.1lf\t%4.1lf\t%10.4lf\n", (double)(2.5 + (j*5)),(double)(2.5 + (j_2*5)), diff_geo_fac_gamma);
-				fprintf(outfile,"%4.1lf\t%4.1lf\t%10.4lf\n", (double)(2.5 + (j*5)), (double)(2.5 + (j_2*5)), diff_geo_fac_gamma);
+	if((outfile = fopen(outfile_name,"w")) == NULL)
+	{    fprintf(stderr,"Error opening %s for output\n",outfile_name);
+		exit(0);    }
+	
+	printf("\nangle\tgeo_factor\n");
+	tot = 0;
+	for(j=0; j<2*NBINS; j++) {
+		for (j_2=0; j_2<2*NBINS; j_2++) {
+			diff_geo_fac_gamma = ( (double)sum_gamma[j][j_2] / hits) * area;
+			tot += diff_geo_fac_gamma;
+			//printf("%4.1lf\t%4.1lf\t%10.4lf\n", (double)(2.5 + (j*5)),(double)(2.5 + (j_2*5)), diff_geo_fac_gamma);
+			fprintf(outfile,"%4.1lf\t%4.1lf\t%10.4lf\n", (double)(2.5 + (j*5)), (double)(2.5 + (j_2*5)), diff_geo_fac_gamma);
 
-			}
 		}
-		printf("total\t%10.4f\n", tot);
-		fclose(outfile);
+	}
+	printf("total\t%10.4f\n", tot);
+	fclose(outfile);
 
-			// 1 degree by 1 degree binned differential geometry factors
-			// Handling output file
-		
-        sprintf(outfile_name,"dgf_2d_g_bin1%s.txt",extension);
+		// 1 degree by 1 degree binned differential geometry factors
+		// Handling output file
+	
+	sprintf(outfile_name,"dgf_2d_g_bin1%s.txt",extension);
 
-        
-		if((outfile = fopen(outfile_name,"w")) == NULL)
-		{    fprintf(stderr,"Error opening %s for output\n",outfile_name);
-			exit(0);    }
-		
-		printf("\nangle\tgeo_factor\n");
-		tot = 0;
-		for(j=0; j<2*NHITS; j++) {
-			for (j_2=0; j_2<2*NHITS; j_2++) {
-				diff_geo_fac_gamma = ( (double)n_hit_gamma[j][j_2] / hits) * area;
-				tot += diff_geo_fac_gamma;
-				//printf("%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j),(double)(0.5 + j_2), diff_geo_fac_gamma);
-				fprintf(outfile,"%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac_gamma);
-				
-			}
+	
+	if((outfile = fopen(outfile_name,"w")) == NULL)
+	{    fprintf(stderr,"Error opening %s for output\n",outfile_name);
+		exit(0);    }
+	
+	printf("\nangle\tgeo_factor\n");
+	tot = 0;
+	for(j=0; j<2*NHITS; j++) {
+		for (j_2=0; j_2<2*NHITS; j_2++) {
+			diff_geo_fac_gamma = ( (double)n_hit_gamma[j][j_2] / hits) * area;
+			tot += diff_geo_fac_gamma;
+			//printf("%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j),(double)(0.5 + j_2), diff_geo_fac_gamma);
+			fprintf(outfile,"%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac_gamma);
+			
 		}
-		printf("total\t%10.4f\n", tot);
-		fclose(outfile);
+	}
+	printf("total\t%10.4f\n", tot);
+	fclose(outfile);
 
-        // 1 degree by 1 degree binned differential geometry factors for gamma by theta
-        // Handling output file
-		
-        sprintf(outfile_name,"dgf_2d_g_theta_bin1%s.txt",extension);
-        
-        
-		if((outfile = fopen(outfile_name,"w")) == NULL)
-		{    fprintf(stderr,"Error opening %s for output\n",outfile_name);
-			exit(0);    }
-		
-		printf("\nangle\tgeo_factor\n");
-		tot = 0;
-		for(j=0; j<2*NHITS; j++) {
-			for (j_2=0; j_2<NHITS; j_2++) {
-				diff_geo_fac_gamma = ( (double)n_hit_theta_gamma[j][j_2] / hits) * area;
-				tot += diff_geo_fac_gamma;
-				//printf("%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j),(double)(0.5 + j_2), diff_geo_fac_gamma);
-				fprintf(outfile,"%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac_gamma);
-				
-			}
+	// 1 degree by 1 degree binned differential geometry factors for gamma by theta
+	// Handling output file
+	
+	sprintf(outfile_name,"dgf_2d_g_theta_bin1%s.txt",extension);
+	
+	
+	if((outfile = fopen(outfile_name,"w")) == NULL)
+	{    fprintf(stderr,"Error opening %s for output\n",outfile_name);
+		exit(0);    }
+	
+	printf("\nangle\tgeo_factor\n");
+	tot = 0;
+	for(j=0; j<2*NHITS; j++) {
+		for (j_2=0; j_2<NHITS; j_2++) {
+			diff_geo_fac_gamma = ( (double)n_hit_theta_gamma[j][j_2] / hits) * area;
+			tot += diff_geo_fac_gamma;
+			//printf("%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j),(double)(0.5 + j_2), diff_geo_fac_gamma);
+			fprintf(outfile,"%4.1lf\t%4.1lf\t%10.4lf\n", (double)(0.5 + j), (double)(0.5 + j_2), diff_geo_fac_gamma);
+			
 		}
-		printf("total\t%10.4f\n", tot);
-		fclose(outfile);
-        
+	}
+	printf("total\t%10.4f\n", tot);
+	fclose(outfile);
+	
         
         
 	/* sec theta geometry factors */
