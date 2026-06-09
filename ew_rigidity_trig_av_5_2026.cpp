@@ -132,18 +132,19 @@ int main(int argc, char* argv[])
     // Geometry factors
     
     // source directory
-    char source_dir[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/geofac_dir/";
+    char source_dir[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/angle/";
     
 
 
     
     // East-West geometry factor
     //char dgf_ew[200] = "/data/calet/abundance_estimate/rigidity/code/geofac_dir/dgf_g_bin1_UH_geom.txt";
-    char dgf_ew[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/angle/dgf_1d_bin1_";
+    char dgf_ew[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/angle/dgf_1d_bin1";
+    // char dgf_ew[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/geofac_dir/";
 
-    if(argc>=5) {
+    if(argc>=3) {
         strcpy(dgf_ew, source_dir);
-        strcat(dgf_ew, "dgf_g_bin1");
+        strcat(dgf_ew, "dgf_1d_bin1");
         strcat(dgf_ew, name_ext1);
         strcat(dgf_ew, ".txt");
     }
@@ -159,8 +160,8 @@ int main(int argc, char* argv[])
     double blah[181];
 
   // Input files.
-  char S_max_rel_in[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/S_max_integral_rel.txt";
-  char S_min_rel_in[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/S_min_integral_rel.txt";
+  char S_max_rel_in[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/tables/S_max_integral_rel.txt";
+  char S_min_rel_in[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/tables/S_min_integral_rel.txt";
 
   char S_max_top[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/tables/S_max_tigeriss_Z_theta_top_PS_Al_thick.txt";
   char S_min_top[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/tables/S_min_tigeriss_Z_theta_top_PS_Al_thick.txt";
@@ -371,9 +372,14 @@ int main(int argc, char* argv[])
 	in_1.close();
 	in_1.clear();
     
+    fprintf(stderr, "dgf_ew_b1_count = %d\n", dgf_ew_b1_count);
     
     // Getting the energy threshold function
+    fprintf(stderr, "About to call Thresholds()...\n");
+    fflush(stderr);
     TGraph2D *gt = Thresholds();
+    fprintf(stderr, "Thresholds() returned\n");
+    fflush(stderr);
     //get->Interpolate(Z,zenith);   // Command to get the threshold for Z and incidence angle
 
     
@@ -478,8 +484,10 @@ int main(int argc, char* argv[])
     
     char geom_file_g_theta_b1_2[200]="/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/angle/dgf_2d_g_theta_bin1";
     
-    
-    if(argc>=5) {
+    // char geom_file_g_theta_b1_1[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/geofac_dir/";
+    // char geom_file_g_theta_b1_2[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/geofac_dir/";
+
+    if(argc>=3) {
         strcpy(geom_file_g_theta_b1_1, source_dir);
         strcat(geom_file_g_theta_b1_1, "dgf_2d_g_theta_bin1");
         strcat(geom_file_g_theta_b1_1, name_ext1);
@@ -489,6 +497,7 @@ int main(int argc, char* argv[])
         strcat(geom_file_g_theta_b1_2, name_ext2);
         strcat(geom_file_g_theta_b1_2, ".txt");
     }
+    
     fprintf(stderr, "geom_file_g_theta_b1_1 = %s\n",geom_file_g_theta_b1_1);
     fprintf(stderr, "geom_file_g_theta_b1_2 = %s\n",geom_file_g_theta_b1_2);
     
@@ -513,8 +522,12 @@ int main(int argc, char* argv[])
     
     //sprintf(geom_file,"%sdgf_2d_g_theta_bin1%s.txt",dir,extension);
     
+    fprintf(stderr, "Opening 2D file 1: %s\n", geom_file_g_theta_b1_1);
 	
 	in_1.open(geom_file_g_theta_b1_1);
+    if(!in_1.is_open()) {
+        fprintf(stderr, "ERROR: Could not open file 1!\n");
+    }
 	while(1) {
 		in_1 >> gamma_g_dgf_theta_b1 >> theta_g_dgf_theta_b1 >> geo_factor_g_dgf_theta_b1;
         if(theta_g_dgf_theta_b1 > 45) {
@@ -533,12 +546,17 @@ int main(int argc, char* argv[])
 		if(in_1.eof() || !in_1.good()) break;
 		g_dgf_count_theta_b1++;
 	}
+    fprintf(stderr, "File 1: Read %d lines, dgf_g_t_adj[0][0]=%f, dgf_g_t_adj[179][89]=%f\n", g_dgf_count_theta_b1, dgf_g_t_adj[0][0], dgf_g_t_adj[179][89]);
 	in_1.close();
 	in_1.clear();
 	
     g_dgf_count_theta_b1 = 0;
     
+    fprintf(stderr, "Opening 2D file 2: %s\n", geom_file_g_theta_b1_2);
     in_1.open(geom_file_g_theta_b1_2);
+    if(!in_1.is_open()) {
+        fprintf(stderr, "ERROR: Could not open file 2!\n");
+    }
     while(1) {
         in_1 >> gamma_g_dgf_theta_b1 >> theta_g_dgf_theta_b1 >> geo_factor_g_dgf_theta_b1;
         if(theta_g_dgf_theta_b1 > 45) {
@@ -557,6 +575,7 @@ int main(int argc, char* argv[])
         if(in_1.eof() || !in_1.good()) break;
         g_dgf_count_theta_b1++;
     }
+    fprintf(stderr, "File 2: Read %d lines, dgf_g_t_adj[0][0]=%f, dgf_g_t_adj[179][89]=%f\n", g_dgf_count_theta_b1, dgf_g_t_adj[0][0], dgf_g_t_adj[179][89]);
     in_1.close();
     in_1.clear();
     
@@ -697,22 +716,85 @@ int main(int argc, char* argv[])
     // Acrylic Cherenkov light collection box
     
     // 2 Silicon strip detectors for top hodoscope and dE/dx charge
-    
+
+    //Updating material stack using Scott's geometries/visualization in Geant4 6/1/2026
+    //Beta Cloth, MLI, Dfab : "external to frame"
+    //Al, epoxy, rohacell, epoxy, Al : "frame"
+    //Si, Kapton, epoxy, Al, epoxy, rohacell, epoxy, al: Top X-SSD
+    //Al, epoxy, rohacell, epoxy, Al : "frame"
+    //Si, Kapton, epoxy, Al, epoxy, rohacell, epoxy, al: Top Y-SSD
+    //Al, epoxy, rohacell, epoxy, Al : "frame"
+    //Poly, Al, epoxy, rohacell, epoxy, Al, GORE, aerogel, Al : Aerogel Cherenkov
+    //Al, epoxy, rohacell, epoxy, Al : "frame"
+    //Al, epoxy, rohacell, epoxy, Al, Acrylic : Acrylic
+    //Al, epoxy, rohacell, epoxy, Al : "frame"
+    //Al, epoxy, rohacell, epoxy, Al : "frame"
+    //Si, Kapton, epoxy, Al, epoxy, rohacell, epoxy, al: Bottom X-SSD
+    //Al, epoxy, rohacell, epoxy, Al : "frame"
+    //Si, Kapton, epoxy, Al, epoxy, rohacell, epoxy, al: Bottom Y-SSD
+    //Beta Cloth, MLI, Dfab : "external to frame"
+
+    //Materials we include: Beta Cloth, MLI, Dfab, Al, epoxy, rohacell, Si, Kapton, Polyethylene, GORE (PTFE), aerogel, Acrylic
     
 
+    //Translating from Brian's code
+    //MLI is Al, Kapton, Polyester, Mylar
+    //Rohacell = PMI (SAME!)
+    //GORE = PTFE
+    //Dfab = Kevlar, Kapton
+    //Epoxy = C2H8O2
+    //Beta Cloth = Glass + Teflon
+    //Kapton = Pulled from Geant4
+    
+    //Adding Aerogel and Acrylic?
+    //Aerogel = 0.2 g/cm^3 (62.5% Sio2, 37.4% H20, 0.1% C)
+    //Acrylic = Pulled from Lucite, (1.19 g/cm^3) (C5H802)
+
+
+
+    //6/1/2026 Updating values from Scott's code
+    //6/5 Might bew best to start from scratch
+
+
     // material densities
-    double den_Al = 2.700; // g/cm^3
-    double den_PET = 1.390; // g/cm^3
-    double den_PVT = 1.030; // g/cm^3
-    double den_PS = 0.040; // g/cm^3
-    double den_Si = 2.329; // g/cm^3
+    //Hasn't been used anywhere
+    
+
+    double den_Al = 2.700; // g/cm^3 USEFUL
+    double den_PET = 1.4; // g/cm^3 Used to be 1.390 in Brian's code, but 1.4 is the listed density of Mylar in Geant4 
+    double den_PVT = 1.030; // g/cm^3 Don't have
+    double den_PS = 0.040; // g/cm^3 Don't have
+    double den_Si = 2.329; // g/cm^3 USEFUL
     double den_SiO2 = 0.205; // g/cm^3
-    double den_Epoxy = 1.135; // g/cm^3
-    double den_PMI = 0.032; // g/cm^3
-    double den_PTFE = 0.600; // g/cm^3
-    double den_PE = 0.919; // g/cm^3
-    double den_Kapton = 1.42; // g/cm^3
-    double den_PU = 0.08;  // g/cm^3 polyurathane foam
+    double den_Epoxy = 1.16; // g/cm^3
+    double den_PMI = 0.032; // g/cm^3 //Disregard
+    double den_PTFE = 0.600; // g/cm^3 //Disregard
+    double den_PE = 0.919; // g/cm^3 //Disregard
+    double den_Kapton = 1.42; // g/cm^3 UP TO DATE
+    double den_PU = 0.08;  // g/cm^3 polyurathane foam Might've thrown out the PU
+
+    //Adding new materials 6/5/2026
+    double den_Aerogel = 0.2; 
+    double den_Acrylic = 1.19;
+    //Aluminum from above
+    double den_beta_cloth = 1.469; //98% glass, 2% Teflon
+    double den_glass = 2.4; //45.98% O, 9.64411% Na, 33.6553% Si, 10.7205% Ca
+    double den_teflon = 2.2; //C2F4
+
+    double den_Dfab = 0.65; //55% Kevlar, 45% Kapton
+    double den_kevlar = 1.44; //C14H10N2O2
+
+    //epoxy taken from above
+
+    double den_gore=0.65; //C2F4
+    double den_kapton=1.42; //C22H10N2O5
+    double den_MLI=0.120935; //2.6% Al, 24.5% Kapton, 33.6% Polyester, 39.3% Mylar
+    double den_Mylar=1.4; //C10H8O4
+    double den_poly=1.4; //C10HO4
+    double den_rohacell=0.032; //C8H11O2N
+    //Si from above
+
+
     
     double width_PVT = 0.0;
     double width_Al = 0.0;
@@ -725,7 +807,22 @@ int main(int argc, char* argv[])
     double width_PTFE = 0.0;
     double width_PE = 0.0;
     double width_Kapton = 0.0;
-    
+
+    //adding thicknesses
+    double inch_to_cm = 2.54;
+
+    double thickness_Acrylic = 0.5 * inch_to_cm; 
+    double thickness_aerogel = 0.788 * inch_to_cm; 
+    double thickness_Al=0.1 * inch_to_cm; 
+    double beta_cloth_thickness = 0.007* inch_to_cm; 
+    double dfab_thickness = 0.007* inch_to_cm; 
+    double epoxy_thickness = 0.134* inch_to_cm; 
+    double gore_thickness = 0.019 * inch_to_cm;
+    double kapton_thickness=0.048 * inch_to_cm;
+    double MLI_Thickness = 0.194 * inch_to_cm;
+    double poly_thickness = 0.004 * inch_to_cm;
+    double rohacell_thickness = 2.994 * inch_to_cm;
+    double silicon_thickenss = 0.08 * inch_to_cm;
     
     // material areal densities to top of active instrument
     double x_PVT_top=0.68581;
@@ -733,7 +830,7 @@ int main(int argc, char* argv[])
 
     // material areal densities to bottom of instrument
     double x_PVT=0.0;
-    double x_Al = 0.4536;
+    // double x_Al = 0.4536;
     double x_PET = 0.1022;
     double x_PS = 0.0;
     double x_Si = 0.9316;
@@ -745,6 +842,21 @@ int main(int argc, char* argv[])
     double x_Kapton = 0.01803;
     double x_PU = 0.0508;
     double x_PMMA = 1.4986;
+
+    //adding new material areal densities 6/5/2026
+    //Come back here
+    double x_Aerogel = den_Aerogel * thickness_aerogel;
+    double x_Acrylic = den_Acrylic * thickness_Acrylic;
+    double x_beta_cloth = den_beta_cloth * beta_cloth_thickness;
+    double x_dfab = den_Dfab * dfab_thickness;
+    double x_epoxy = den_Epoxy * epoxy_thickness;
+    double x_gore = den_gore * gore_thickness;
+    double x_kapton = den_kapton * kapton_thickness;
+    double x_MLI = den_MLI * MLI_Thickness;
+    double x_poly = den_poly * poly_thickness;
+    double x_rohacell = den_rohacell * rohacell_thickness;
+    double x_silicon = den_Si * silicon_thickenss;
+    double x_Al = den_Al * thickness_Al;
 
     // material areal densities to bottom of second Si layer
     double x_PVT_Si2=0.0;
@@ -761,38 +873,76 @@ int main(int argc, char* argv[])
     double x_PU_Si2 = 0.00000;
     double x_PMMA_Si2 = 0.00000;
 
+    //will add thicknesses through to second Si Layer 6/5/2026
+
 
 	
     // material properties
 	
-    // PVT: C9H10
+
+    // // PVT: C9H10
+    // // 
 	int n_PVT_H = 10;
 	int n_PVT_C = 9;
 	
-    // PS: C8H8
+    // // PS: C8H8
 	int n_PS_H = 8;
 	int n_PS_C = 8;
 	
     // PMMA: C5H8O2
-	int n_PMMA_H = 8;
-	int n_PMMA_C = 5;
-	int n_PMMA_O = 2;
+    //CFRP in Scott's code
+    //Acrylic
+	int n_Acrylic_H = 8;
+	int n_Acrylic_C = 5;
+	int n_Acrylic_O = 2;
+
+    int n_PMMA_H = 8;
+    int n_PMMA_C = 5;
+    int n_PMMA_O = 2;
+
+    //Aerogel
+    int n_Aerogel_Si = 1;
+    int n_Aerogel_O = 2;
+
+    //Beta Cloth 98% glass, 2% Teflon
+    //approximate glass as SiO2 + Na and Ca
+    // int n_Glass_O = 2;
+    // int n_Glass_Si = 1;
+    // int n_Glass_Ca = 1;
+    // int n_Glass_Na = 1;
+
+    int n_Teflon_C = 2;
+    int n_Teflon_F = 4;
+
+
+    //dfab = 55% Kevlar, 45% Kapton
+    int n_Kevlar_C = 14;
+    int n_Kevlar_H = 10;
+    int n_Kevlar_N = 2;
+    int n_Kevlar_O = 2;
+
+    //Epoxy: C2H8O2
+    int n_Epoxy_C = 2;
+    int n_Epoxy_H = 8;
+    int n_Epoxy_O = 2;
     
     // PMI: C8H11O2N
+    //Rohacell
     int n_PMI_H = 11;
     int n_PMI_C = 8;
     int n_PMI_O = 2;
     int n_PMI_N = 1;
     
     // PTFE: C2F4
+    //GORE
     int n_PTFE_C = 2;
     int n_PTFE_F = 4;
     
-    // PE: C2H4
+    // // // PE: C2H4
     int n_PE_C = 2;
     int n_PE_H = 4;
     
-    // PU: C25H42N2O6
+    // // PU: C25H42N2O6
     int n_PU_C = 25;
     int n_PU_H = 42;
     int n_PU_N = 2;
@@ -803,8 +953,18 @@ int main(int argc, char* argv[])
     int n_Kapton_H = 10;
     int n_Kapton_N = 2;
     int n_Kapton_O = 5;
+
+    //MLI: 2.6% Al, 24.5% Kapton, 33.6% Polyester, 39.3% Mylar
+    //Defining Polyester and Mylar
+    int n_Poly_C=6;
+    int n_Poly_H=1;
+    int n_Poly_O=4;
+
+    int n_Mylar_C=10;
+    int n_Mylar_H=8;
+    int n_Mylar_O=4;
     
-    // PET: C10H8O4 Polyethylene terepthalate (Mylar)
+    // // PET: C10H8O4 Polyethylene terepthalate (Mylar)
     int n_PET_C = 10;
     int n_PET_H = 8;
     int n_PET_O = 4;
@@ -818,6 +978,11 @@ int main(int argc, char* argv[])
 	
     // Aluminum: Al
 	int n_Al = 1;
+
+    int n_O = 1;
+    int n_Na = 1;
+    int n_Ca = 1;
+    int n_F = 1;
     
 	
     // Correction Factors
@@ -835,6 +1000,8 @@ int main(int argc, char* argv[])
 	double A_C=12.0107;
 	double A_Si=28.0855;
 	double A_Al=26.981538;
+    double A_Na=22.98976928;
+    double A_Ca=40.078;
 	
 	double R_N=0;
 	double R_O=0;
@@ -843,6 +1010,8 @@ int main(int argc, char* argv[])
     double R_F=0;
 	double R_Si=0;
 	double R_Al=0;
+    double R_Na=0;
+    double R_Ca=0;
     
     double R_Z=0; // Radius of interaction 
 
@@ -855,6 +1024,9 @@ int main(int argc, char* argv[])
 	R_Si = 1.58*pow(A_Si,0.281);
 	R_Al = 1.58*pow(A_Al,0.281);
     R_F = 1.58*pow(A_F,0.281);
+    R_Na = 1.58*pow(A_Na,0.281);
+    R_Ca = 1.58*pow(A_Ca,0.281);
+
 	
     
 	double angle_fac=0.0;
@@ -868,11 +1040,15 @@ int main(int argc, char* argv[])
     double sig_tot_F_eq_9 = 0.0;
     double sig_tot_Si_eq_9 = 0.0;
     double sig_tot_Al_eq_9 = 0.0;
-    
+    double sig_tot_Na_eq_9 = 0.0;
+    double sig_tot_Ca_eq_9 = 0.0;
+
     double lambda_PVT = 0.0;
     double lambda_PS = 0.0;
     double lambda_PMMA = 0.0;
+    
     double lambda_SiO2 = 0.0;
+
     double lambda_Al = 0.0;
     double lambda_PMI = 0.0;
     double lambda_PTFE = 0.0;
@@ -881,6 +1057,26 @@ int main(int argc, char* argv[])
     double lambda_PU = 0.0;
     double lambda_Si = 0.0;
     double lambda_PET = 0.0;
+
+    double lambda_Aerogel = 0.0;
+    double lambda_Acrylic = 0.0;
+    double lambda_beta_cloth = 0.0;
+    double lambda_glass = 0.0;
+    double lambda_teflon = 0.0;
+    double lambda_dfab = 0.0;
+    double lambda_epoxy = 0.0;
+    double lambda_gore = 0.0;
+    double lambda_kapton = 0.0;
+    double lambda_MLI = 0.0;
+    double lambda_poly = 0.0;
+    double lambda_rohacell = 0.0;
+    double lambda_silicon = 0.0;
+
+    double lambda_kevlar = 0.0;
+    double lambda_Mylar = 0.0;
+
+
+    // double lambda_Al = 0.0;
 
 
     // Material mean free paths
@@ -896,10 +1092,10 @@ int main(int argc, char* argv[])
     // Fe-spectrum with TOA abundances from HEAO and TIGER
     // Format from email from Kelly Lave: /data/tiger/calet/abundance_estimate/rigidity/tables/CRIS stuff.html
     char S_max_in[200] =
-    "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/S_max_integral_spectra.txt";
+    "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/tables/S_max_integral_spectra.txt";
     
     char S_min_in[200] =
-    "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/S_min_integral_spectra.txt";
+    "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/tables/S_min_integral_spectra.txt";
     
     
     char Z_char[2]; // file header dummy value - will read in "Z"
@@ -1016,6 +1212,14 @@ int main(int argc, char* argv[])
 
     
     if (Z_S_min == Z_S_max) {
+    // Skip Z=61 (Promethium) - radioactive with no stable isotopes
+    if (Z == 61) {
+        fprintf(stderr,"Skipping Z=61 (Promethium) - radioactive element with no stable isotopes\n");
+        fprintf(stdout,"%2d %e %e %e %e %e %e %e %e %e %e %e %e\n",
+                Z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        return 0;
+    }
+    
         Z=Z_S_min;
     }
     else {
@@ -1042,6 +1246,8 @@ int main(int argc, char* argv[])
     sig_tot_F_eq_9 = 0.01*TMath::Pi()*pow((S_fac*R_F + S_fac*R_Z - 3.2),2);
     sig_tot_Si_eq_9 = 0.01*TMath::Pi()*pow((S_fac*R_Si + S_fac*R_Z - 3.2),2);
     sig_tot_Al_eq_9 = 0.01*TMath::Pi()*pow((S_fac*R_Al + S_fac*R_Z - 3.2),2);
+    sig_tot_Na_eq_9 = 0.01*TMath::Pi()*pow((S_fac*R_Na + S_fac*R_Z - 3.2),2);
+    sig_tot_Ca_eq_9 = 0.01*TMath::Pi()*pow((S_fac*R_Ca + S_fac*R_Z - 3.2),2);
 
 
     lambda_PVT = 1.6624*(n_PVT_H*A_H + n_PVT_C*A_C)/(n_PVT_H*sig_tot_H_eq_9 + n_PVT_C*sig_tot_C_eq_9);
@@ -1051,12 +1257,75 @@ int main(int argc, char* argv[])
     lambda_PMMA = 1.6624*(n_PMMA_H*A_H + n_PMMA_C*A_C + n_PMMA_O*A_O)/
     (n_PMMA_H*sig_tot_H_eq_9 + n_PMMA_C*sig_tot_C_eq_9 + n_PMMA_O*sig_tot_O_eq_9);
 
+    lambda_Acrylic = 1.6624*(n_Acrylic_H*A_H + n_Acrylic_C*A_C + n_Acrylic_O*A_O)/
+    (n_Acrylic_H*sig_tot_H_eq_9 + n_Acrylic_C*sig_tot_C_eq_9 + n_Acrylic_O*sig_tot_O_eq_9);
+
+    lambda_Aerogel = 1.6624*(n_Aerogel_Si*A_Si + n_Aerogel_O*A_O)/
+    (n_Aerogel_Si*sig_tot_Si_eq_9 + n_Aerogel_O*sig_tot_O_eq_9); 
+
     lambda_SiO2 = 1.6624*(n_Glass_Si*A_Si + n_Glass_O*A_O)/
     (n_Glass_Si*sig_tot_Si_eq_9 + n_Glass_O*sig_tot_O_eq_9);
     
-    lambda_Al = 1.6624*(n_Al*A_Al)/
-    (n_Al*sig_tot_Al_eq_9);
+    lambda_Al = 1.6624*(n_Al*A_Al)/(n_Al*sig_tot_Al_eq_9);
+    lambda_Kapton = 1.6624*(n_Kapton_H*A_H + n_Kapton_C*A_C + n_Kapton_N*A_N + n_Kapton_O*A_O)/
+    (n_Kapton_H*sig_tot_H_eq_9 + n_Kapton_C*sig_tot_C_eq_9 +
+     n_Kapton_N*sig_tot_N_eq_9 + n_Kapton_O*sig_tot_O_eq_9);
+
+    lambda_Si = 1.6624*(n_Si*A_Si)/(n_Si*sig_tot_Si_eq_9);
+
+    lambda_epoxy = 1.6624*(n_Epoxy_H*A_H + n_Epoxy_C*A_C + n_Epoxy_O*A_O)/(n_Epoxy_H*sig_tot_H_eq_9 + n_Epoxy_C*sig_tot_C_eq_9 + n_Epoxy_O*sig_tot_O_eq_9);
+
+    lambda_gore = 1.6624*(n_PTFE_C*A_C + n_PTFE_F*A_F)/(n_PTFE_C*sig_tot_C_eq_9 + n_PTFE_F*sig_tot_F_eq_9);
+
+    lambda_kapton = 1.6624*(n_Kapton_C*A_C + n_Kapton_H*A_H + n_Kapton_N*A_N + n_Kapton_O*A_O)/(n_Kapton_C*sig_tot_C_eq_9 + n_Kapton_H*sig_tot_H_eq_9 + n_Kapton_N*sig_tot_N_eq_9 + n_Kapton_O*sig_tot_O_eq_9);
+
     
+    lambda_poly = 1.6624*(n_Poly_C*A_C + n_Poly_H*A_H + n_Poly_O*A_O)/
+    (n_Poly_C*sig_tot_C_eq_9 + n_Poly_H*sig_tot_H_eq_9 + n_Poly_O*sig_tot_O_eq_9);
+
+    lambda_rohacell = 1.6624*(n_PMI_H*A_H + n_PMI_C*A_C + n_PMI_O*A_O + n_PMI_N*A_N)/
+    (n_PMI_H*sig_tot_H_eq_9 + n_PMI_C*sig_tot_C_eq_9 + n_PMI_O*sig_tot_O_eq_9 + n_PMI_N*sig_tot_N_eq_9);
+
+    lambda_silicon = 1.6624*(n_Si*A_Si)/(n_Si*sig_tot_Si_eq_9);
+
+    // Beta cloth:
+
+    // 98% glass 2% Teflon (C2F4)
+    // Glass: 0.4598 O, 0.0964411 Na, 0.336553 Si, 0.107205 Ca
+    // 1/lambda_glass = 0.4598/lambda_O + 0.0964411/lambda_Na + 0.336553/lambda_Si + 0.107205/lambda_Ca
+    double lambda_O = 1.6624*(n_O*A_O)/(n_O*sig_tot_O_eq_9);
+    double lambda_Na = 1.6624*(n_Na*A_Na)/(n_Na*sig_tot_Na_eq_9);
+    double lambda_Ca = 1.6624*(n_Ca*A_Ca)/(n_Ca*sig_tot_Ca_eq_9);
+    double reciprocal_lambda_glass = 0.4598/lambda_O + 0.0964411/lambda_Na + 0.336553/lambda_Si + 0.107205/lambda_Ca;
+    lambda_teflon = 1.6624*(n_Teflon_C*A_C + n_Teflon_F*A_F)/(n_Teflon_C*sig_tot_C_eq_9 + n_Teflon_F*sig_tot_F_eq_9);
+    // 1/lambda_beta = .98/(lambda_glass) + 0.02 * (1/lambda_teflon)
+    double reciprocal_lambda_beta_cloth = 0.98*reciprocal_lambda_glass + 0.02/lambda_teflon;
+    lambda_beta_cloth = 1/reciprocal_lambda_beta_cloth;
+
+
+
+    // Dfab:
+    // 55% Kevlar, 45% Kapton
+
+    // 1/lambda_dfab=0.55/lambda_kevlar + 0.45/lambda_kapton
+
+    lambda_kevlar = 1.6624*(n_Kevlar_C*A_C + n_Kevlar_H*A_H + n_Kevlar_N*A_N + n_Kevlar_O*A_O)/
+    (n_Kevlar_C*sig_tot_C_eq_9 + n_Kevlar_H*sig_tot_H_eq_9 + n_Kevlar_N*sig_tot_N_eq_9 + n_Kevlar_O*sig_tot_O_eq_9);
+
+    double reciprocal_lambda_dfab = 0.55/lambda_kevlar + 0.45/lambda_kapton;
+    lambda_dfab = 1/reciprocal_lambda_dfab;
+
+    // MLI: 2.6% Al, 24.5% Kapton, 33.6% Polyester, 39.3% Mylar
+
+    // 1/lambda_MLI = 0.026/lambda_Al + 0.245/lambda_Kapton + 0.336/lambda_Polyester + 0.393/lambda_Mylar
+    lambda_Mylar = 1.6624*(n_Mylar_C*A_C + n_Mylar_H*A_H + n_Mylar_O*A_O)/
+    (n_Mylar_C*sig_tot_C_eq_9 + n_Mylar_H*sig_tot_H_eq_9 + n_Mylar_O*sig_tot_O_eq_9);
+
+    double reciprocal_lambda_MLI = 0.026/lambda_Al + 0.245/lambda_kapton + 0.336/lambda_poly + 0.393/lambda_Mylar;
+    lambda_MLI = 1/reciprocal_lambda_MLI;
+
+
+
     lambda_PMI = 1.6624*(n_PMI_H*A_H + n_PMI_C*A_C + n_PMI_O*A_O + n_PMI_N*A_N)/
     (n_PMI_H*sig_tot_H_eq_9 + n_PMI_C*sig_tot_C_eq_9 + n_PMI_O*sig_tot_O_eq_9 + n_PMI_N*sig_tot_N_eq_9);
     
@@ -1069,22 +1338,20 @@ int main(int argc, char* argv[])
     lambda_PET = 1.6624*(n_PET_H*A_H + n_PET_C*A_C + n_PET_O*A_O)/
     (n_PET_H*sig_tot_H_eq_9 + n_PET_C*sig_tot_C_eq_9 + n_PET_O*sig_tot_O_eq_9);
     
-    lambda_Kapton = 1.6624*(n_Kapton_H*A_H + n_Kapton_C*A_C + n_Kapton_N*A_N + n_Kapton_O*A_O)/
-    (n_Kapton_H*sig_tot_H_eq_9 + n_Kapton_C*sig_tot_C_eq_9 +
-     n_Kapton_N*sig_tot_N_eq_9 + n_Kapton_O*sig_tot_O_eq_9);
+    
+
     
     lambda_PU = 1.6624*(n_PU_H*A_H + n_PU_C*A_C + n_PU_N*A_N + n_PU_O*A_O)/
     (n_PU_H*sig_tot_H_eq_9 + n_PU_C*sig_tot_C_eq_9 + n_PU_N*sig_tot_N_eq_9 + n_PU_O*sig_tot_O_eq_9);
     
-    lambda_Si = 1.6624*(n_Si*A_Si)/(n_Si*sig_tot_Si_eq_9);
     
 
 
 
 		
-    fprintf(stderr,"A: %f lambda_PVT: %f\n",A,lambda_PVT);
-    fprintf(stderr,"sig_tot_H_eq_9: %f\n",sig_tot_H_eq_9);
-    fprintf(stderr,"sig_tot_C_eq_9: %f\n",sig_tot_C_eq_9);
+    // fprintf(stderr,"A: %f lambda_PVT: %f\n",A,lambda_PVT);
+    // fprintf(stderr,"sig_tot_H_eq_9: %f\n",sig_tot_H_eq_9);
+    // fprintf(stderr,"sig_tot_C_eq_9: %f\n",sig_tot_C_eq_9);
 
 
     
@@ -1247,31 +1514,49 @@ int main(int argc, char* argv[])
         
         // I_factor[theta_index] = exp(-x_PVT/lambda_PVT);
         
-        I_factor[theta_index] =
-        exp(-x_PS*angle_fac/lambda_PS)*
-        exp(-x_Al*angle_fac/lambda_Al)*
-        exp(-x_Si*angle_fac/lambda_Si)*
-        exp(-x_PET*angle_fac/lambda_PET)*
-        exp(-x_PMI*angle_fac/lambda_PMI)*
-        exp(-x_PMMA*angle_fac/lambda_PMMA)*
-        exp(-x_Kapton*angle_fac/lambda_Kapton)*
-        exp(-x_SiO2*angle_fac/lambda_SiO2)*
-        exp(-x_PE*angle_fac/lambda_PE)*
-        exp(-x_PU*angle_fac/lambda_PU)*
-        exp(-x_PTFE*angle_fac/lambda_PTFE);
 
-        I_factor_Si2[theta_index] =
-        exp(-x_PS_Si2*angle_fac/lambda_PS)*
-        exp(-x_Al_Si2*angle_fac/lambda_Al)*
-        exp(-x_Si_Si2*angle_fac/lambda_Si)*
-        exp(-x_PET_Si2*angle_fac/lambda_PET)*
-        exp(-x_PMI_Si2*angle_fac/lambda_PMI)*
-        exp(-x_PMMA_Si2*angle_fac/lambda_PMMA)*
-        exp(-x_Kapton_Si2*angle_fac/lambda_Kapton)*
-        exp(-x_SiO2_Si2*angle_fac/lambda_SiO2)*
-        exp(-x_PE_Si2*angle_fac/lambda_PE)*
-        exp(-x_PU_Si2*angle_fac/lambda_PU)*
-        exp(-x_PTFE_Si2*angle_fac/lambda_PTFE);
+        //KEY COME BACK HERE
+        // I_factor[theta_index] =
+        // exp(-x_PS*angle_fac/lambda_PS)*
+        // exp(-x_Al*angle_fac/lambda_Al)*
+        // exp(-x_Si*angle_fac/lambda_Si)*
+        // exp(-x_PET*angle_fac/lambda_PET)*
+        // exp(-x_PMI*angle_fac/lambda_PMI)*
+        // exp(-x_PMMA*angle_fac/lambda_PMMA)*
+        // exp(-x_Kapton*angle_fac/lambda_Kapton)*
+        // exp(-x_SiO2*angle_fac/lambda_SiO2)*
+        // exp(-x_PE*angle_fac/lambda_PE)*
+        // exp(-x_PU*angle_fac/lambda_PU)*
+        // exp(-x_PTFE*angle_fac/lambda_PTFE);
+
+        I_factor[theta_index] =
+        exp(-x_Acrylic*angle_fac/lambda_Acrylic)*
+        exp(-x_Aerogel*angle_fac/lambda_Aerogel)*
+        exp(-x_beta_cloth*angle_fac/lambda_beta_cloth)*
+        exp(-x_dfab*angle_fac/lambda_dfab)*
+        exp(-x_epoxy*angle_fac/lambda_epoxy)*
+        exp(-x_gore*angle_fac/lambda_gore)*
+        exp(-x_kapton*angle_fac/lambda_kapton)*
+        exp(-x_MLI*angle_fac/lambda_MLI)*
+        exp(-x_poly*angle_fac/lambda_poly)*
+        exp(-x_rohacell*angle_fac/lambda_rohacell)*
+        exp(-x_silicon*angle_fac/lambda_silicon)*
+        exp(-x_Al*angle_fac/lambda_Al);
+
+        I_factor_Si2[theta_index] = I_factor[theta_index]; //Ignoring for now
+
+        // I_factor_Si2[theta_index] =
+        // exp(-x_PS_Si2*angle_fac/lambda_PS)*
+        // exp(-x_Al_Si2*angle_fac/lambda_Al)*
+        // exp(-x_Si_Si2*angle_fac/lambda_Si)*
+        // exp(-x_PET_Si2*angle_fac/lambda_PET)*
+        // exp(-x_PMI_Si2*angle_fac/lambda_PMI)*
+        // exp(-x_PMMA_Si2*angle_fac/lambda_PMMA)*
+        // exp(-x_Kapton_Si2*angle_fac/lambda_Kapton)*
+        // exp(-x_SiO2_Si2*angle_fac/lambda_SiO2)*
+        // exp(-x_PE_Si2*angle_fac/lambda_PE)*
+        // exp(-x_PU_Si2*angle_fac/lambda_PU)*
+        // exp(-x_PTFE_Si2*angle_fac/lambda_PTFE);
         
         fprintf(stderr,"theta_val: %.1f I_factor[%d]: %.6f I_factor_Si2[%d]: %.6f\n",
                         theta_val,theta_index,I_factor[theta_index],theta_index,I_factor_Si2[theta_index]);
@@ -1285,6 +1570,8 @@ int main(int argc, char* argv[])
         }
     }
     
+    fprintf(stderr,"Starting event accumulation loop\n");
+    fflush(stderr);
     
     for (g_m_l_index=0; g_m_l_index<90; g_m_l_index++) {
 		for (a_index=0; a_index<180; a_index++) {
@@ -1579,7 +1866,38 @@ int main(int argc, char* argv[])
     fprintf(stdout,"%e %e %e ",0.5*(S_max_events_int_Si2 + S_min_events_int_Si2),S_max_events_int_Si2,S_min_events_int_Si2);
     fprintf(stdout,"%e %e %e\n",0.5*(S_max_events_int_Si2_top + S_min_events_int_Si2_top),S_max_events_int_Si2_top,S_min_events_int_Si2_top);
     fprintf(stderr,"%d %f %f %f\n",Z,0.5*(S_max_events_tot + S_min_events_tot),S_max_events_tot,S_min_events_tot);
-
+    fflush(stdout);
+    
+    // Write I_factor values to file with all thetas as columns
+    FILE *I_factor_file;
+    
+    // Check if file exists - if not, write header
+    I_factor_file = fopen("output/I_factor_values.txt", "r");
+    int write_header = (I_factor_file == NULL);
+    if (I_factor_file != NULL) fclose(I_factor_file);
+    
+    // Open in append mode
+    I_factor_file = fopen("output/I_factor_values.txt", "a");
+    if (I_factor_file != NULL) {
+        // Write header on first run (when Z=5)
+        if (write_header) {
+            fprintf(I_factor_file, "Z");
+            for (theta_index=0; theta_index<90; theta_index++) {
+                theta_val = theta_index + 0.5;
+                fprintf(I_factor_file, " %.1f", theta_val);
+            }
+            fprintf(I_factor_file, "\n");
+        }
+        
+        // Write data row for this Z
+        fprintf(I_factor_file, "%d", Z_iter);
+        for (theta_index=0; theta_index<90; theta_index++) {
+            fprintf(I_factor_file, " %.6e", I_factor[theta_index]);
+        }
+        fprintf(I_factor_file, "\n");
+        fclose(I_factor_file);
+        fprintf(stderr, "I_factor row for Z=%d written to output/I_factor_values.txt\n", Z_iter);
+    }
 
     
 /*
@@ -1753,15 +2071,15 @@ TGraph2D* Thresholds()
   //get->Interpolate(Z,zenith);
   
 //  string fname = "Thresholds_SOX_20230307.txt";
-  string fname = "input/EThresh.txt";
-  const int MAXZ=80;
-  const int MAXZEN = 70;
+  string fname = "input/Ethresh.txt";
+  const int MAXZ=92;
+  const int MAXZEN = 90;
   double ch[MAXZ], p0[MAXZ], p1[MAXZ], p2[MAXZ], p3[MAXZ];
   string line;
   
   ifstream ifile(fname, ios::in);
 
-  TGraph2D* dd;
+  TGraph2D* dd = nullptr;
   if (!ifile.is_open()) {
     cout << "unable to open file " << fname << endl;
     return dd;
@@ -1773,7 +2091,7 @@ TGraph2D* Thresholds()
       if (line[0] == '#'  || line == "") continue; 
       stringstream ss(line);
       ss >> ch[iknt] >> p0[iknt] >> p1[iknt] >> p2[iknt] >> p3[iknt];
-      cout << ch[iknt] << "\t" << p0[iknt] << "\t" <<  p1[iknt] << "\t" <<  p2[iknt] << "\t" <<  p3[iknt] << "\t" << endl;
+      //cout << ch[iknt] << "\t" << p0[iknt] << "\t" <<  p1[iknt] << "\t" <<  p2[iknt] << "\t" <<  p3[iknt] << "\t" << endl;
       iknt++;
   }
   
@@ -1787,15 +2105,15 @@ TGraph2D* Thresholds()
   
   int npt = 0;
   TF1 *fp = new TF1("fp","pol3",0,90);
-  for (int iZ=0; iZ<iknt; iZ++) //charge
+  for (int iZ=0; iZ<iknt && iZ<MAXZ; iZ++) //charge
   {
     fp->SetParameters(p0[iZ],p1[iZ],p2[iZ],p3[iZ]);
-    for (int izen = 0; izen<=MAXZEN; izen++)
+    for (int izen = 0; izen<MAXZEN; izen++)
     {
       Z[npt] = ch[iZ];
       zen[npt] = izen;
       Ethr[npt] = fp->Eval(zen[npt]);
-      cout << npt << "\t" << Z[npt] << "\t" << zen[npt] << "\t" << Ethr[npt] << endl; 
+      //cout << npt << "\t" << Z[npt] << "\t" << zen[npt] << "\t" << Ethr[npt] << endl; 
       npt++;
       if (npt > MAXN) cout << "DANGER! npt, MAXN: " << npt << "\t" << MAXN << endl;
     }
