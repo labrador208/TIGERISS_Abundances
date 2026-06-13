@@ -114,8 +114,8 @@ int main(int argc, char* argv[])
     
     int Z_iter=92;
     double E_gf_thresh_Fe = 350.0;
-    char name_ext1[20] = "_tigeriss1";
-    char name_ext2[20] = "_tigeriss2";
+    char name_ext1[20] = "_9x9det";
+    char name_ext2[20] = "_9x9det_2f";
     
     if(argc>=2) Z_iter=atoi(argv[1]);
     
@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
     char dgf_ew[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/angle/dgf_1d_bin1";
     // char dgf_ew[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/geofac_dir/";
 
-    if(argc>=3) {
+    if(argc>=4) {
         strcpy(dgf_ew, source_dir);
         strcat(dgf_ew, "dgf_1d_bin1");
         strcat(dgf_ew, name_ext1);
@@ -304,7 +304,7 @@ int main(int argc, char* argv[])
     el_ind=0;
 
     in_1.open(S_min_top);
-    fprintf(stderr,"S_min top spectra modification file\n");
+    // fprintf(stderr,"S_min top spectra modification file\n");
 
     
     in_1 >> char_blah >> char_Z;
@@ -317,10 +317,10 @@ int main(int argc, char* argv[])
     
     while (1) {
         in_1 >> Z_el[el_ind];
-        fprintf(stderr,"Z_el: %2d \n",Z_el[el_ind]);
+        // fprintf(stderr,"Z_el: %2d \n",Z_el[el_ind]);
          for (i=0; i<90; i++) {
             in_1 >> S_min_delta_abund[el_ind][i];
-            fprintf(stderr,"S_min_delta_abund[%d][%d]: %e\n",el_ind,i,S_min_delta_abund[el_ind][i]);
+            // fprintf(stderr,"S_min_delta_abund[%d][%d]: %e\n",el_ind,i,S_min_delta_abund[el_ind][i]);
         }
         if(in_1.eof() || !in_1.good()) break;
 
@@ -361,8 +361,8 @@ int main(int argc, char* argv[])
             geo_factor_dgf_ew_b1_adj[dgf_ew_b1_count] = geo_factor_dgf_ew_b1[dgf_ew_b1_count]/1E4;
         }
         blah[dgf_ew_b1_count]=geo_factor_dgf_ew_b1_adj[dgf_ew_b1_count];
-        fprintf(stderr,"geo_factor_dgf_ew_b1_adj[%d]: %f\n",dgf_ew_b1_count,geo_factor_dgf_ew_b1_adj[dgf_ew_b1_count]);
-        fprintf(stderr,"blah[%d]: %f\n",dgf_ew_b1_count,blah[dgf_ew_b1_count]);
+        // fprintf(stderr,"geo_factor_dgf_ew_b1_adj[%d]: %f\n",dgf_ew_b1_count,geo_factor_dgf_ew_b1_adj[dgf_ew_b1_count]);
+        // fprintf(stderr,"blah[%d]: %f\n",dgf_ew_b1_count,blah[dgf_ew_b1_count]);
         
 		if(in_1.eof() || !in_1.good()) break;
 		
@@ -487,7 +487,7 @@ int main(int argc, char* argv[])
     // char geom_file_g_theta_b1_1[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/geofac_dir/";
     // char geom_file_g_theta_b1_2[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/geofac_dir/";
 
-    if(argc>=3) {
+    if(argc>=4) {
         strcpy(geom_file_g_theta_b1_1, source_dir);
         strcat(geom_file_g_theta_b1_1, "dgf_2d_g_theta_bin1");
         strcat(geom_file_g_theta_b1_1, name_ext1);
@@ -845,19 +845,33 @@ int main(int argc, char* argv[])
 
     //adding new material areal densities 6/5/2026
     //Come back here
+    fprintf(stderr, "DEBUG: Calculating material areal densities...\n");
+    fflush(stderr);
     double x_Aerogel = den_Aerogel * thickness_aerogel;
+    fprintf(stderr, "x_Aerogel = %f\n", x_Aerogel);
     double x_Acrylic = den_Acrylic * thickness_Acrylic;
+    fprintf(stderr, "x_Acrylic = %f\n", x_Acrylic);
     double x_beta_cloth = den_beta_cloth * beta_cloth_thickness;
+    fprintf(stderr, "x_beta_cloth = %f\n", x_beta_cloth);
     double x_dfab = den_Dfab * dfab_thickness;
+    fprintf(stderr, "x_dfab = %f\n", x_dfab);
     double x_epoxy = den_Epoxy * epoxy_thickness;
+    fprintf(stderr, "x_epoxy = %f\n", x_epoxy);
     double x_gore = den_gore * gore_thickness;
+    fprintf(stderr, "x_gore = %f\n", x_gore);
     double x_kapton = den_kapton * kapton_thickness;
+    fprintf(stderr, "x_kapton = %f\n", x_kapton);
     double x_MLI = den_MLI * MLI_Thickness;
+    fprintf(stderr, "x_MLI = %f\n", x_MLI);
     double x_poly = den_poly * poly_thickness;
+    fprintf(stderr, "x_poly = %f\n", x_poly);
     double x_rohacell = den_rohacell * rohacell_thickness;
+    fprintf(stderr, "x_rohacell = %f\n", x_rohacell);
     double x_silicon = den_Si * silicon_thickenss;
+    fprintf(stderr, "x_silicon = %f\n", x_silicon);
     double x_Al = den_Al * thickness_Al;
-
+    fprintf(stderr, "x_Al = %f\n", x_Al);
+    fflush(stderr);
     // material areal densities to bottom of second Si layer
     double x_PVT_Si2=0.0;
     double x_Al_Si2 = 0.14580;
@@ -1132,7 +1146,7 @@ int main(int argc, char* argv[])
     
   
     in_1.open(S_max_in);
-    fprintf(stderr,"S_max integral file\n");
+    // fprintf(stderr,"S_max integral file\n");
     
     in_1 >> Z_char >> A_char >> X_char;
     
@@ -1145,7 +1159,7 @@ int main(int argc, char* argv[])
     
     while (1) {
         in_1 >> Z_S_max >> A_S_max >> cs_S_max;
-        fprintf(stderr,"Z: %2d A: %.2f %s\n",Z_S_max,A_S_max,cs_S_max);
+        // fprintf(stderr,"Z: %2d A: %.2f %s\n",Z_S_max,A_S_max,cs_S_max);
         for (i=0; i<201; i++) {
             in_1 >> F_int_S_max[i];
         }
@@ -1165,12 +1179,12 @@ int main(int argc, char* argv[])
     in_1.clear();
     
     in_1.open(S_min_in);
-    fprintf(stderr,"S_min integral file\n");
+    // fprintf(stderr,"S_min integral file\n");
 
     
     in_1 >> Z_char >> A_char >> X_char;
     
-    fprintf(stderr,"%s %s %s\n",Z_char,A_char,X_char);
+    // fprintf(stderr,"%s %s %s\n",Z_char,A_char,X_char);
     
     for (i=0; i<201; i++) {
         in_1 >> E_int_S_min[i];
@@ -1178,7 +1192,7 @@ int main(int argc, char* argv[])
     
     while (1) {
         in_1 >> Z_S_min >> A_S_min >> cs_S_min;
-        fprintf(stderr,"Z: %2d A: %.2f %s\n",Z_S_min,A_S_min,cs_S_min);
+        // fprintf(stderr,"Z: %2d A: %.2f %s\n",Z_S_min,A_S_min,cs_S_min);
         for (i=0; i<201; i++) {
             in_1 >> F_int_S_min[i];
         }
@@ -1558,8 +1572,8 @@ int main(int argc, char* argv[])
         // exp(-x_PU_Si2*angle_fac/lambda_PU)*
         // exp(-x_PTFE_Si2*angle_fac/lambda_PTFE);
         
-        fprintf(stderr,"theta_val: %.1f I_factor[%d]: %.6f I_factor_Si2[%d]: %.6f\n",
-                        theta_val,theta_index,I_factor[theta_index],theta_index,I_factor_Si2[theta_index]);
+        // fprintf(stderr,"theta_val: %.1f I_factor[%d]: %.6f I_factor_Si2[%d]: %.6f\n",
+                        // theta_val,theta_index,I_factor[theta_index],theta_index,I_factor_Si2[theta_index]);
     }
     
 
@@ -2072,6 +2086,7 @@ TGraph2D* Thresholds()
   
 //  string fname = "Thresholds_SOX_20230307.txt";
   string fname = "input/Ethresh.txt";
+//   string fname = "input/Thresholds_SOX_20230504.txt";
   const int MAXZ=92;
   const int MAXZEN = 90;
   double ch[MAXZ], p0[MAXZ], p1[MAXZ], p2[MAXZ], p3[MAXZ];
