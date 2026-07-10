@@ -657,7 +657,7 @@ int main(int argc, char* argv[])
     
     
     // Read in geomagnetic latitude residence times
-	char geo_lat_file[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/tables/geomagnetic_latitude_orbit_fraction_SAA.txt";
+	char geo_lat_file[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/ISS_Position/geomagnetic_latitude_fractions_original.txt";
 	int g_m_l_count=0;
 	double angle_g_m_l[90];
 	double orbit_fraction_g_m_l[90];
@@ -845,33 +845,33 @@ int main(int argc, char* argv[])
 
     //adding new material areal densities 6/5/2026
     //Come back here
-    fprintf(stderr, "DEBUG: Calculating material areal densities...\n");
-    fflush(stderr);
+    // fprintf(stderr, "DEBUG: Calculating material areal densities...\n");
+    // fflush(stderr);
     double x_Aerogel = den_Aerogel * thickness_aerogel;
-    fprintf(stderr, "x_Aerogel = %f\n", x_Aerogel);
+    // fprintf(stderr, "x_Aerogel = %f\n", x_Aerogel);
     double x_Acrylic = den_Acrylic * thickness_Acrylic;
-    fprintf(stderr, "x_Acrylic = %f\n", x_Acrylic);
+    // fprintf(stderr, "x_Acrylic = %f\n", x_Acrylic);
     double x_beta_cloth = den_beta_cloth * beta_cloth_thickness;
-    fprintf(stderr, "x_beta_cloth = %f\n", x_beta_cloth);
+    // fprintf(stderr, "x_beta_cloth = %f\n", x_beta_cloth);
     double x_dfab = den_Dfab * dfab_thickness;
-    fprintf(stderr, "x_dfab = %f\n", x_dfab);
+    // fprintf(stderr, "x_dfab = %f\n", x_dfab);
     double x_epoxy = den_Epoxy * epoxy_thickness;
-    fprintf(stderr, "x_epoxy = %f\n", x_epoxy);
+    // fprintf(stderr, "x_epoxy = %f\n", x_epoxy);
     double x_gore = den_gore * gore_thickness;
-    fprintf(stderr, "x_gore = %f\n", x_gore);
+    // fprintf(stderr, "x_gore = %f\n", x_gore);
     double x_kapton = den_kapton * kapton_thickness;
-    fprintf(stderr, "x_kapton = %f\n", x_kapton);
+    // fprintf(stderr, "x_kapton = %f\n", x_kapton);
     double x_MLI = den_MLI * MLI_Thickness;
-    fprintf(stderr, "x_MLI = %f\n", x_MLI);
+    // fprintf(stderr, "x_MLI = %f\n", x_MLI);
     double x_poly = den_poly * poly_thickness;
-    fprintf(stderr, "x_poly = %f\n", x_poly);
+    // fprintf(stderr, "x_poly = %f\n", x_poly);
     double x_rohacell = den_rohacell * rohacell_thickness;
-    fprintf(stderr, "x_rohacell = %f\n", x_rohacell);
+    // fprintf(stderr, "x_rohacell = %f\n", x_rohacell);
     double x_silicon = den_Si * silicon_thickenss;
-    fprintf(stderr, "x_silicon = %f\n", x_silicon);
+    // fprintf(stderr, "x_silicon = %f\n", x_silicon);
     double x_Al = den_Al * thickness_Al;
-    fprintf(stderr, "x_Al = %f\n", x_Al);
-    fflush(stderr);
+    // fprintf(stderr, "x_Al = %f\n", x_Al);
+    // fflush(stderr);
     // material areal densities to bottom of second Si layer
     double x_PVT_Si2=0.0;
     double x_Al_Si2 = 0.14580;
