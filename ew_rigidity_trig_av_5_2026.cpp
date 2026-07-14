@@ -110,8 +110,54 @@ int main(int argc, char* argv[])
     
     ifstream in_1, in_2;
     ofstream out_1;
-  
-    
+
+    // Implementing rotation of the detector as it processes through the ISS orbit path
+    // char rotation_file[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/ISS_Position/geomagneticlatitudefraction.txt";  
+    // int latitude[37440];
+    // int longitude[37440];
+    // double fractionatposition[37440];
+    // double rigidity[37440];
+
+    // for(int i=0; i<37440; i++) {
+    //     latitude[i] = 0;
+    //     longitude[i] = 0;
+    //     fractionatposition[i] = 0.0;
+    //     rigidity[i] = 0.0;
+    // }
+    // in_1.open(rotation_file);
+    // int index=0;
+    // while(1) {
+    //     in_1 >> latitude[i] >> longitude[i] >> fractionatposition[i] >> rigidity[i];
+    //     if(in_1.eof() || !in_1.good()) break;
+    //     i++;
+    // }
+    // in_1.close();
+    // in_1.clear();
+
+    char latitudes[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/ISS_Position/latitude_distribution_oneway.txt";
+    // double lat[208];
+    // double fraction[208];
+    // int orientation[208];
+    double lat[104];
+    double fraction[104];
+    int orientation[104];
+    // for(int i=0; i<208; i++) {
+    for(int i=0; i<104; i++) {
+
+        lat[i] = 0;
+        fraction[i] = 0.0;
+        orientation[i] = 0;
+    }
+    in_1.open(latitudes);
+    int z=0;
+    while(1) {
+        in_1 >> lat[z] >> fraction[z] >> orientation[z];
+        if(in_1.eof() || !in_1.good()) break;
+        z++;
+    }
+    in_1.close();
+    in_1.clear();
+
     int Z_iter=92;
     double E_gf_thresh_Fe = 350.0;
     char name_ext1[20] = "_9x9det";
@@ -135,7 +181,7 @@ int main(int argc, char* argv[])
     char source_dir[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/angle/";
     
 
-
+    
     
     // East-West geometry factor
     //char dgf_ew[200] = "/data/calet/abundance_estimate/rigidity/code/geofac_dir/dgf_g_bin1_UH_geom.txt";
@@ -480,6 +526,8 @@ int main(int argc, char* argv[])
     
     //char geom_file_g_theta_b1[200]="/data/calet/abundance_estimate/rigidity/code/geofac_dir/dgf_2d_g_theta_bin1_UH_test.txt";
     
+    //7/10/2026: This is where we input newer geometry factors
+
     char geom_file_g_theta_b1_1[200]="/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/angle/dgf_2d_g_theta_bin1";
     
     char geom_file_g_theta_b1_2[200]="/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/TIGERISS_Abundances/angle/dgf_2d_g_theta_bin1";
@@ -487,21 +535,21 @@ int main(int argc, char* argv[])
     // char geom_file_g_theta_b1_1[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/geofac_dir/";
     // char geom_file_g_theta_b1_2[200] = "/Users/william/Desktop/TIGERISS_Sim/TIGERISS_Abundances/geofac_dir/";
 
-    if(argc>=4) {
-        strcpy(geom_file_g_theta_b1_1, source_dir);
-        strcat(geom_file_g_theta_b1_1, "dgf_2d_g_theta_bin1");
-        strcat(geom_file_g_theta_b1_1, name_ext1);
-        strcat(geom_file_g_theta_b1_1, ".txt");
-        strcpy(geom_file_g_theta_b1_2, source_dir);
-        strcat(geom_file_g_theta_b1_2, "dgf_2d_g_theta_bin1");
-        strcat(geom_file_g_theta_b1_2, name_ext2);
-        strcat(geom_file_g_theta_b1_2, ".txt");
-    }
+    // if(argc>=4) {
+    //     strcpy(geom_file_g_theta_b1_1, source_dir);
+    //     strcat(geom_file_g_theta_b1_1, "dgf_2d_g_theta_bin1");
+    //     strcat(geom_file_g_theta_b1_1, name_ext1);
+    //     strcat(geom_file_g_theta_b1_1, ".txt");
+    //     strcpy(geom_file_g_theta_b1_2, source_dir);
+    //     strcat(geom_file_g_theta_b1_2, "dgf_2d_g_theta_bin1");
+    //     strcat(geom_file_g_theta_b1_2, name_ext2);
+    //     strcat(geom_file_g_theta_b1_2, ".txt");
+    // }
     
-    fprintf(stderr, "geom_file_g_theta_b1_1 = %s\n",geom_file_g_theta_b1_1);
-    fprintf(stderr, "geom_file_g_theta_b1_2 = %s\n",geom_file_g_theta_b1_2);
     
-	int g_dgf_count_theta_b1=0;
+    // fprintf(stderr, "geom_file_g_theta_b1_2 = %s\n",geom_file_g_theta_b1_2);
+    
+	// int g_dgf_count_theta_b1=0;
 	
 	double gamma_g_dgf_theta_b1;
 	double theta_g_dgf_theta_b1;
@@ -519,65 +567,103 @@ int main(int argc, char* argv[])
             dgf_g_t_adj[g_index][t_index] = 0.0;
         }
     }
+
+    // for (int i = 0; i<208; i++){
+    for (int i = 0; i<104; i++){
+
+        sprintf(geom_file_g_theta_b1_1, "%sdgf_2d_g_theta_bin1_deg%03d_rotated.txt", source_dir, orientation[i]);
+        // std::cout<<"LOOKHEREHEREHRERHEREHREHRE"<<std::endl;
+
+        int g_dgf_count_theta_b1=0;
+
+        fprintf(stderr, "Opening 2D file 1: %s\n", geom_file_g_theta_b1_1);
+	
+        in_1.open(geom_file_g_theta_b1_1);
+        if(!in_1.is_open()) {
+            fprintf(stderr, "ERROR: Could not open file 1!\n");
+        }
+        while(1) {
+            in_1 >> gamma_g_dgf_theta_b1 >> theta_g_dgf_theta_b1 >> geo_factor_g_dgf_theta_b1;
+            if(theta_g_dgf_theta_b1 > 45) {
+                geo_factor_g_dgf_theta_b1_adj = 0.75*geo_factor_g_dgf_theta_b1;
+            }
+            else {
+                geo_factor_g_dgf_theta_b1_adj = geo_factor_g_dgf_theta_b1;
+            }
+            g_index=(int)(gamma_g_dgf_theta_b1 - 0.5);
+            t_index=(int)(theta_g_dgf_theta_b1 - 0.5);
+            
+            dgf_g_t[g_index][t_index]+=fraction[i]*geo_factor_g_dgf_theta_b1;
+            dgf_g_t_adj[g_index][t_index]+=fraction[i]*geo_factor_g_dgf_theta_b1_adj;
+            
+            
+            if(in_1.eof() || !in_1.good()) break;
+            g_dgf_count_theta_b1++;
+        }
+        fprintf(stderr, "File 1: Read %d lines, dgf_g_t_adj[0][0]=%f, dgf_g_t_adj[179][89]=%f\n", g_dgf_count_theta_b1, dgf_g_t_adj[0][0], dgf_g_t_adj[179][89]);
+        in_1.close();
+        in_1.clear();
+
+    }
     
     //sprintf(geom_file,"%sdgf_2d_g_theta_bin1%s.txt",dir,extension);
     
-    fprintf(stderr, "Opening 2D file 1: %s\n", geom_file_g_theta_b1_1);
+    // fprintf(stderr, "Opening 2D file 1: %s\n", geom_file_g_theta_b1_1);
 	
-	in_1.open(geom_file_g_theta_b1_1);
-    if(!in_1.is_open()) {
-        fprintf(stderr, "ERROR: Could not open file 1!\n");
-    }
-	while(1) {
-		in_1 >> gamma_g_dgf_theta_b1 >> theta_g_dgf_theta_b1 >> geo_factor_g_dgf_theta_b1;
-        if(theta_g_dgf_theta_b1 > 45) {
-            geo_factor_g_dgf_theta_b1_adj = 0.75*geo_factor_g_dgf_theta_b1;
-        }
-        else {
-            geo_factor_g_dgf_theta_b1_adj = geo_factor_g_dgf_theta_b1;
-        }
-        g_index=(int)(gamma_g_dgf_theta_b1 - 0.5);
-        t_index=(int)(theta_g_dgf_theta_b1 - 0.5);
+	// in_1.open(geom_file_g_theta_b1_1);
+    // if(!in_1.is_open()) {
+    //     fprintf(stderr, "ERROR: Could not open file 1!\n");
+    // }
+	// while(1) {
+	// 	in_1 >> gamma_g_dgf_theta_b1 >> theta_g_dgf_theta_b1 >> geo_factor_g_dgf_theta_b1;
+    //     if(theta_g_dgf_theta_b1 > 45) {
+    //         geo_factor_g_dgf_theta_b1_adj = 0.75*geo_factor_g_dgf_theta_b1;
+    //     }
+    //     else {
+    //         geo_factor_g_dgf_theta_b1_adj = geo_factor_g_dgf_theta_b1;
+    //     }
+    //     g_index=(int)(gamma_g_dgf_theta_b1 - 0.5);
+    //     t_index=(int)(theta_g_dgf_theta_b1 - 0.5);
         
-        dgf_g_t[g_index][t_index]+=0.5*geo_factor_g_dgf_theta_b1;
-        dgf_g_t_adj[g_index][t_index]+=0.5*geo_factor_g_dgf_theta_b1_adj;
+    //     dgf_g_t[g_index][t_index]+=0.5*geo_factor_g_dgf_theta_b1;
+    //     dgf_g_t_adj[g_index][t_index]+=0.5*geo_factor_g_dgf_theta_b1_adj;
         
         
-		if(in_1.eof() || !in_1.good()) break;
-		g_dgf_count_theta_b1++;
-	}
-    fprintf(stderr, "File 1: Read %d lines, dgf_g_t_adj[0][0]=%f, dgf_g_t_adj[179][89]=%f\n", g_dgf_count_theta_b1, dgf_g_t_adj[0][0], dgf_g_t_adj[179][89]);
-	in_1.close();
-	in_1.clear();
+	// 	if(in_1.eof() || !in_1.good()) break;
+	// 	g_dgf_count_theta_b1++;
+	// }
+    // fprintf(stderr, "File 1: Read %d lines, dgf_g_t_adj[0][0]=%f, dgf_g_t_adj[179][89]=%f\n", g_dgf_count_theta_b1, dgf_g_t_adj[0][0], dgf_g_t_adj[179][89]);
+	// in_1.close();
+	// in_1.clear();
 	
-    g_dgf_count_theta_b1 = 0;
+    // g_dgf_count_theta_b1 = 0;
     
-    fprintf(stderr, "Opening 2D file 2: %s\n", geom_file_g_theta_b1_2);
-    in_1.open(geom_file_g_theta_b1_2);
-    if(!in_1.is_open()) {
-        fprintf(stderr, "ERROR: Could not open file 2!\n");
-    }
-    while(1) {
-        in_1 >> gamma_g_dgf_theta_b1 >> theta_g_dgf_theta_b1 >> geo_factor_g_dgf_theta_b1;
-        if(theta_g_dgf_theta_b1 > 45) {
-            geo_factor_g_dgf_theta_b1_adj = 0.75*geo_factor_g_dgf_theta_b1;
-        }
-        else {
-            geo_factor_g_dgf_theta_b1_adj = geo_factor_g_dgf_theta_b1;
-        }
-        g_index=(int)(gamma_g_dgf_theta_b1 - 0.5);
-        t_index=(int)(theta_g_dgf_theta_b1 - 0.5);
+    // fprintf(stderr, "Opening 2D file 2: %s\n", geom_file_g_theta_b1_2);
+    // in_1.open(geom_file_g_theta_b1_2);
+    // if(!in_1.is_open()) {
+    //     fprintf(stderr, "ERROR: Could not open file 2!\n");
+    // }
+    // while(1) {
+    //     in_1 >> gamma_g_dgf_theta_b1 >> theta_g_dgf_theta_b1 >> geo_factor_g_dgf_theta_b1;
+    //     if(theta_g_dgf_theta_b1 > 45) {
+    //         geo_factor_g_dgf_theta_b1_adj = 0.75*geo_factor_g_dgf_theta_b1;
+    //     }
+    //     else {
+    //         geo_factor_g_dgf_theta_b1_adj = geo_factor_g_dgf_theta_b1;
+    //     }
+    //     g_index=(int)(gamma_g_dgf_theta_b1 - 0.5);
+    //     t_index=(int)(theta_g_dgf_theta_b1 - 0.5);
         
-        dgf_g_t[g_index][t_index]+=0.5*geo_factor_g_dgf_theta_b1;
-        dgf_g_t_adj[g_index][t_index]+=0.5*geo_factor_g_dgf_theta_b1_adj;
+    //     dgf_g_t[g_index][t_index]+=0.5*geo_factor_g_dgf_theta_b1;
+    //     dgf_g_t_adj[g_index][t_index]+=0.5*geo_factor_g_dgf_theta_b1_adj;
         
         
-        if(in_1.eof() || !in_1.good()) break;
-        g_dgf_count_theta_b1++;
-    }
-    fprintf(stderr, "File 2: Read %d lines, dgf_g_t_adj[0][0]=%f, dgf_g_t_adj[179][89]=%f\n", g_dgf_count_theta_b1, dgf_g_t_adj[0][0], dgf_g_t_adj[179][89]);
-    in_1.close();
-    in_1.clear();
+    //     if(in_1.eof() || !in_1.good()) break;
+    //     g_dgf_count_theta_b1++;
+    // }
+    // fprintf(stderr, "File 2: Read %d lines, dgf_g_t_adj[0][0]=%f, dgf_g_t_adj[179][89]=%f\n", g_dgf_count_theta_b1, dgf_g_t_adj[0][0], dgf_g_t_adj[179][89]);
+    // in_1.close();
+    // in_1.clear();
     
     
     // Geomagnetic rigidity analysis
